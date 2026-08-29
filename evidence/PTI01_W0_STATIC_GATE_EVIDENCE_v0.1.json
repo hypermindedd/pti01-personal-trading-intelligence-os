@@ -1,0 +1,27 @@
+{
+  "project": "PTI.01",
+  "wave": "W0",
+  "candidate": "v0.1",
+  "parent_commit": "cf101deacf2e185aa4d1fb6d6b6c1188528cd911",
+  "gate": "STATIC_ARCHITECTURE_SAFETY_CONTRACT_GATE",
+  "result": "PASS",
+  "test_runner": "python stdlib unittest",
+  "tests_run": 7,
+  "tests_passed": 7,
+  "tests_failed": 0,
+  "missing_required_files": [],
+  "forbidden_capabilities_in_allow_set": [],
+  "canonical_claim": false,
+  "lock_claim": false,
+  "runtime_claim": false,
+  "real_mt5_claim": false,
+  "tooling_note": "Initial pytest invocation could not start because pytest was unavailable. The candidate was changed to use Python standard-library unittest, then the complete suite and static gate passed.",
+  "file_sha256": {
+    "config/read_only_policy.v0.1.json": "c14834f6510c43a3076c8220c50f4b156777f889cf8cf0b10e904cd81585e799",
+    "docs/adr/ADR-0001-read-only-observer.md": "e6a8824a962c555ebf3344db31638a0382cd6eedebca7264dee802b4d9fcd14d",
+    "docs/architecture/W0_ARCHITECTURE_v0.1.md": "f21dc11b0e16cd55e50e1d4f1bbbaef1e389913607844add42ee0ebd4d349c84",
+    "docs/contracts/EVENT_ENVELOPE_v0.1.md": "97be7a413871f5c3cc2941ff6568526f1c88bed5a6cfa1db9e39eeb8173dafe0",
+    "docs/contracts/STORAGE_LAYERS_v0.1.md": "2ec7d98302965141598c3a0fe8b699cf864ebcb2e9baceea3f1e6acc77585b6f",
+    "schemas/events/event-envelope.v0.1.schema.json": "ecb05c721c73447c70db611ccf1ce8c91f477d4d3bd6463cf4d87d18e5110e9f"
+  }
+}

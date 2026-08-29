@@ -1,0 +1,38 @@
+{
+  "project": "PTI.01",
+  "version": "0.1.0",
+  "mode": "READ_ONLY",
+  "default_decision": "DENY",
+  "allowed_capabilities": [
+    "observe.account_metadata_sanitized",
+    "observe.trade_transactions",
+    "observe.chart_objects",
+    "observe.market_ticks",
+    "observe.market_bars",
+    "snapshot.multi_timeframe_state",
+    "persist.raw_append_only",
+    "derive.versioned_features",
+    "replay.deterministic"
+  ],
+  "forbidden_capabilities": [
+    "broker.order_send",
+    "broker.order_modify",
+    "broker.order_cancel",
+    "broker.position_open",
+    "broker.position_close",
+    "broker.position_modify",
+    "chart.object_create",
+    "chart.object_modify",
+    "chart.object_delete",
+    "account.setting_modify"
+  ],
+  "fail_closed_on": [
+    "unknown_capability",
+    "missing_provenance",
+    "clock_regression",
+    "sequence_gap",
+    "raw_hash_mismatch",
+    "schema_validation_failure",
+    "storage_layer_violation"
+  ]
+}
