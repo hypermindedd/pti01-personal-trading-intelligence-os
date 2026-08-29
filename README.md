@@ -4,9 +4,9 @@ Read-only, evidence-driven personal trading intelligence for MetaTrader 5.
 
 ## Current status
 
-`BOOTSTRAP / PRE-W0`
+`W0 — IN PROGRESS`
 
-No runtime, collection, analysis, trading, or broker-mutation capability is claimed.
+Repository bootstrap is complete. Architecture, safety, and data contracts are under construction. No runtime, collection, analysis, trading, or broker-mutation capability is claimed.
 
 ## Hard boundary
 
@@ -33,6 +33,6 @@ Latent rules are discovered from observed behavior without requiring the trader 
 - Runtime evidence store: raw observations, replay evidence, and gates.
 - Raw trading and tick datasets are forbidden in Git.
 
-## Next valid wave
+## Active wave
 
 `W0 — Architecture, Safety & Data Contracts`
