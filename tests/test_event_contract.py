@@ -24,6 +24,8 @@ def valid_event():
         "ingested_at_utc": "2026-08-29T13:00:00.010000Z",
         "source": "MT5_TERMINAL",
         "schema_version": "0.1.0",
+        "event_registry_version": "0.1.0",
+        "payload_schema_version": "0.1.0",
         "payload": payload,
         "payload_sha256": sha256_json(payload),
         "previous_event_sha256": None,
@@ -65,6 +67,12 @@ class EventContractTests(unittest.TestCase):
                 mutate(event)
                 with self.assertRaisesRegex(ContractViolation, expected):
                     validate_event(event)
+
+    def test_unsupported_payload_schema_version_fails_closed(self):
+        event = valid_event()
+        event["payload_schema_version"] = "9.9.9"
+        with self.assertRaisesRegex(ContractViolation, "payload_schema_version"):
+            validate_event(event)
 
     def test_missing_type_specific_payload_field_fails_closed(self):
         event = valid_event()
