@@ -4,21 +4,56 @@
   "title": "PTI.01 Event Envelope v0.1",
   "type": "object",
   "additionalProperties": false,
-  "required": ["event_id", "stream_id", "sequence", "event_type", "observed_at_utc", "ingested_at_utc", "source", "schema_version", "payload", "payload_sha256", "provenance"],
+  "required": [
+    "event_id",
+    "stream_id",
+    "sequence",
+    "event_type",
+    "observed_at_utc",
+    "ingested_at_utc",
+    "source",
+    "schema_version",
+    "event_registry_version",
+    "payload_schema_version",
+    "payload",
+    "payload_sha256",
+    "provenance"
+  ],
   "properties": {
     "event_id": {"type": "string", "pattern": "^evt_[0-9A-HJKMNP-TV-Z]{26}$"},
     "stream_id": {"type": "string", "minLength": 1, "maxLength": 160},
     "sequence": {"type": "integer", "minimum": 0},
-    "event_type": {"type": "string", "enum": ["trade.transaction.observed", "trade.state.snapshot", "chart.object.observed", "chart.state.snapshot", "market.tick.observed", "market.bar.observed", "market.state.snapshot", "quality.gap.detected", "quality.reconciliation.recorded"]},
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "trade.transaction.observed",
+        "trade.state.snapshot",
+        "chart.object.observed",
+        "chart.state.snapshot",
+        "market.tick.observed",
+        "market.bar.observed",
+        "market.state.snapshot",
+        "quality.gap.detected",
+        "quality.reconciliation.recorded"
+      ]
+    },
     "observed_at_utc": {"type": "string", "format": "date-time"},
     "source_time_utc": {"type": ["string", "null"], "format": "date-time"},
     "ingested_at_utc": {"type": "string", "format": "date-time"},
-    "source": {"type": "string", "enum": ["MT5_TERMINAL", "MT5_CHART", "PTI_RECONCILER"]},
+    "source": {
+      "type": "string",
+      "enum": ["MT5_TERMINAL", "MT5_CHART", "PTI_RECONCILER"]
+    },
     "source_instance_id": {"type": ["string", "null"], "maxLength": 128},
     "schema_version": {"const": "0.1.0"},
+    "event_registry_version": {"const": "0.1.0"},
+    "payload_schema_version": {"const": "0.1.0"},
     "payload": {"type": "object"},
     "payload_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
-    "previous_event_sha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
+    "previous_event_sha256": {
+      "type": ["string", "null"],
+      "pattern": "^[a-f0-9]{64}$"
+    },
     "provenance": {
       "type": "object",
       "additionalProperties": false,
