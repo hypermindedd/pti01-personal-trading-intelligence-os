@@ -1,0 +1,41 @@
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+dist/
+build/
+*.egg-info/
+
+# Runtime data — forbidden in Git
+*.db
+*.sqlite
+*.sqlite3
+*.parquet
+*.feather
+*.arrow
+*.tick
+data/
+runtime/
+artifacts/raw/
+evidence/raw/
+
+# MT5 generated/runtime
+*.ex5
+*.log
+MQL5/Files/
+MQL5/Logs/
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
