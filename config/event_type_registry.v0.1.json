@@ -1,0 +1,46 @@
+{
+  "project": "PTI.01",
+  "version": "0.1.0",
+  "default_decision": "DENY",
+  "active_event_types": {
+    "trade.transaction.observed": {"epistemic_class": "OBSERVED", "required_payload_fields": ["trade_lifecycle_id", "transaction_kind", "symbol", "volume"]},
+    "trade.state.snapshot": {"epistemic_class": "OBSERVED", "required_payload_fields": ["snapshot_id", "completeness", "positions"]},
+    "chart.object.observed": {"epistemic_class": "OBSERVED", "required_payload_fields": ["object_lifecycle_id", "object_type", "state"]},
+    "chart.state.snapshot": {"epistemic_class": "OBSERVED", "required_payload_fields": ["snapshot_id", "completeness", "objects"]},
+    "market.tick.observed": {"epistemic_class": "OBSERVED", "required_payload_fields": ["symbol", "bid", "ask"]},
+    "market.bar.observed": {"epistemic_class": "OBSERVED", "required_payload_fields": ["symbol", "timeframe", "open", "high", "low", "close"]},
+    "market.state.snapshot": {"epistemic_class": "OBSERVED", "required_payload_fields": ["snapshot_id", "symbol", "timeframes", "completeness"]},
+    "quality.gap.detected": {"epistemic_class": "QUALITY", "required_payload_fields": ["affected_stream_id", "expected_sequence", "observed_sequence", "reason"]},
+    "quality.reconciliation.recorded": {"epistemic_class": "QUALITY", "required_payload_fields": ["snapshot_id", "replay_boundary", "disposition", "discrepancies"]}
+  },
+  "reserved_event_types": [
+    "trade.intent_proxy.observed",
+    "trade.entry.observed",
+    "trade.management.observed",
+    "trade.exit.observed",
+    "trade.post_exit.observed",
+    "chart.object.created_observed",
+    "chart.object.moved_observed",
+    "chart.object.deleted_observed",
+    "market.mtf.snapshot",
+    "market.microstructure.snapshot",
+    "market.gap.observed",
+    "market.fvg.derived",
+    "market.liquidity_void.derived",
+    "collector.started",
+    "collector.stopped",
+    "collector.heartbeat",
+    "collector.degraded"
+  ],
+  "forbidden_event_types": [
+    "broker.order_send",
+    "broker.order_modify",
+    "broker.order_cancel",
+    "broker.position_open",
+    "broker.position_close",
+    "broker.position_modify",
+    "chart.object.create",
+    "chart.object.modify",
+    "chart.object.delete"
+  ]
+}
