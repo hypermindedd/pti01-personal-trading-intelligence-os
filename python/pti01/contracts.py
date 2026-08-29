@@ -88,6 +88,8 @@ def validate_event(event: dict[str, Any]) -> None:
         "ingested_at_utc",
         "source",
         "schema_version",
+        "event_registry_version",
+        "payload_schema_version",
         "payload",
         "payload_sha256",
         "provenance",
@@ -113,6 +115,10 @@ def validate_event(event: dict[str, Any]) -> None:
         raise ContractViolation("source: unknown source")
     if event["schema_version"] != "0.1.0":
         raise ContractViolation("schema_version: unsupported")
+    if event["event_registry_version"] != "0.1.0":
+        raise ContractViolation("event_registry_version: unsupported")
+    if event["payload_schema_version"] != "0.1.0":
+        raise ContractViolation("payload_schema_version: unsupported")
     observed = _datetime_utc(event["observed_at_utc"], "observed_at_utc")
     ingested = _datetime_utc(event["ingested_at_utc"], "ingested_at_utc")
     if ingested < observed:
