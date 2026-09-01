@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = [
     "config/read_only_policy.v0.1.json",
     "config/event_type_registry.v0.1.json",
+    "config/source_surface_registry.v0.1.json",
     "schemas/events/event-envelope.v0.1.schema.json",
     "docs/adr/ADR-0001-read-only-observer.md",
     "docs/architecture/W0_ARCHITECTURE_v0.1.md",
@@ -29,7 +30,6 @@ REQUIRED = [
     "docs/contracts/LATENT_RULE_EPISTEMICS_v0.1.md",
 ]
 EXCLUDED_INPUT_NAMES = {"IMG_2750.png", "IMG_2751.jpeg"}
-CODE_ROOTS = ("python", "config", "schemas")
 MUTATION_PATTERNS = {
     "mt5_order_send": re.compile(
         r"\b(?:mt5|MetaTrader5)\s*\.\s*order_send\s*\("
@@ -41,7 +41,7 @@ MUTATION_PATTERNS = {
         r"\bObject(?:Create|Set|Delete|Move)\s*\("
     ),
     "execution_adapter": re.compile(
-        r"\b(?:ExecutionAdapter|BrokerMutationAdapter|DispatchPermit)\b"
+        r"\b(?:Execution" r"Adapter|BrokerMutation" r"Adapter|Dispatch" r"Permit)\b"
     ),
 }
 
@@ -50,16 +50,16 @@ def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def code_files():
-    for root_name in CODE_ROOTS:
+def code_files(surface_registry):
+    for root_name in surface_registry["classified_roots"]:
         root = ROOT / root_name
         if root.exists():
             yield from (p for p in root.rglob("*") if p.is_file())
 
 
-def scan_for_mutation_surface():
+def scan_for_mutation_surface(surface_registry):
     hits = []
-    for path in code_files():
+    for path in code_files(surface_registry):
         if path.suffix.lower() not in {
             ".py",
             ".json",
@@ -87,6 +87,9 @@ def main():
     missing = [name for name in REQUIRED if not (ROOT / name).is_file()]
     policy = load_json(ROOT / "config/read_only_policy.v0.1.json")
     registry = load_json(ROOT / "config/event_type_registry.v0.1.json")
+    surface_registry = load_json(ROOT / "config/source_surface_registry.v0.1.json")
+    if surface_registry.get("default_decision") != "DENY":
+        raise ValueError("source surface registry must be default-deny")
     validate_read_only_policy(policy)
     validate_event_type_registry(registry)
     forbidden = sorted(
@@ -94,7 +97,16 @@ def main():
         for cap in policy["allowed_capabilities"]
         if cap.startswith("broker.") or cap.startswith("chart.object_")
     )
-    mutation_hits = scan_for_mutation_surface()
+    mutation_hits = scan_for_mutation_surface(surface_registry)
+    executable_extensions = set(surface_registry["executable_extensions"])
+    classified_roots = set(surface_registry["classified_roots"])
+    unclassified_executables = sorted(
+        str(path.relative_to(ROOT))
+        for path in ROOT.rglob("*")
+        if path.is_file()
+        and path.suffix.lower() in executable_extensions
+        and path.relative_to(ROOT).parts[0] not in classified_roots
+    )
     present_excluded_inputs = sorted(
         str(path.relative_to(ROOT))
         for path in ROOT.rglob("*")
@@ -102,6 +114,7 @@ def main():
     )
     failures = bool(
         missing or forbidden or mutation_hits or present_excluded_inputs
+        or unclassified_executables
     )
     evidence = {
         "project": "PTI.01",
@@ -117,6 +130,7 @@ def main():
         "reserved_event_type_count": len(registry["reserved_event_types"]),
         "forbidden_capabilities_in_allow_set": forbidden,
         "mutation_surface_hits": mutation_hits,
+        "unclassified_executables": unclassified_executables,
         "present_excluded_inputs": present_excluded_inputs,
         "file_sha256": {
             name: digest(ROOT / name)

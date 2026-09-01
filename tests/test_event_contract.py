@@ -1,4 +1,6 @@
 import copy
+import math
+import unicodedata
 import unittest
 from pathlib import Path
 
@@ -87,11 +89,55 @@ class EventContractTests(unittest.TestCase):
         with self.assertRaisesRegex(ContractViolation, "reserved"):
             validate_event(event)
 
+    def test_registry_is_runtime_admission_authority(self):
+        registry_path = ROOT / "config/event_type_registry.v0.1.json"
+        original = registry_path.read_text()
+        registry = load_json(registry_path)
+        definition = registry["active_event_types"].pop("market.tick.observed")
+        registry["reserved_event_types"].append("market.tick.observed")
+        try:
+            import json
+            registry_path.write_text(json.dumps(registry), encoding="utf-8")
+            with self.assertRaisesRegex(ContractViolation, "reserved"):
+                validate_event(valid_event())
+        finally:
+            registry_path.write_text(original, encoding="utf-8")
+
     def test_boolean_sequence_is_rejected(self):
         event = valid_event()
         event["sequence"] = True
         with self.assertRaisesRegex(ContractViolation, "non-negative integer"):
             validate_event(event)
+
+    def test_schema_constraints_are_enforced(self):
+        cases = [
+            lambda e: e.update(unexpected=True),
+            lambda e: e.update(stream_id="x" * 161),
+            lambda e: e.update(source_instance_id="x" * 129),
+            lambda e: e.update(previous_event_sha256="not-a-hash"),
+            lambda e: e.update(source_time_utc="garbage"),
+            lambda e: e["provenance"].update(unexpected=True),
+        ]
+        for mutate in cases:
+            with self.subTest(mutate=mutate):
+                event = valid_event()
+                mutate(event)
+                with self.assertRaises(ContractViolation):
+                    validate_event(event)
+
+    def test_invalid_tick_payload_types_fail_closed(self):
+        for value in (True, "abc", math.nan, math.inf, -math.inf):
+            with self.subTest(value=value):
+                event = valid_event()
+                event["payload"]["bid"] = value
+                with self.assertRaises(ContractViolation):
+                    event["payload_sha256"] = sha256_json(event["payload"])
+                    validate_event(event)
+
+    def test_canonical_hash_is_unicode_nfc_stable(self):
+        nfc = unicodedata.normalize("NFC", "A\u030A")
+        nfd = unicodedata.normalize("NFD", "A\u030A")
+        self.assertEqual(sha256_json({"symbol": nfc}), sha256_json({"symbol": nfd}))
 
     def test_event_registry_matches_validator(self):
         registry = load_json(

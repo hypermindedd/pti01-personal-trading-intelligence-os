@@ -2,15 +2,6 @@ name: W0 contract gate
 
 on:
   pull_request:
-    paths:
-      - "config/**"
-      - "schemas/**"
-      - "python/**"
-      - "tests/**"
-      - "scripts/w0_gate.py"
-      - "docs/architecture/**"
-      - "docs/contracts/**"
-      - "docs/adr/**"
   push:
     branches: [main]
 

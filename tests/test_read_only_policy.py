@@ -26,6 +26,14 @@ class ReadOnlyPolicyTests(unittest.TestCase):
         with self.assertRaises(ContractViolation):
             validate_read_only_policy(policy)
 
+    def test_unknown_capability_aliases_fail_closed(self):
+        for capability in ("execute.trade", "terminal.dispatch", "mt5.send"):
+            with self.subTest(capability=capability):
+                policy = copy.deepcopy(self.policy)
+                policy["allowed_capabilities"].append(capability)
+                with self.assertRaisesRegex(ContractViolation, "exact authority"):
+                    validate_read_only_policy(policy)
+
 
 if __name__ == "__main__":
     unittest.main()

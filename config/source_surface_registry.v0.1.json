@@ -1,0 +1,15 @@
+{
+  "version": "0.1.0",
+  "default_decision": "DENY",
+  "classified_roots": {
+    ".github": "CI_EXECUTABLE",
+    "config": "CONTRACT_DATA",
+    "evidence": "NON_RUNTIME_EVIDENCE",
+    "mql5": "RUNTIME_CAPABLE",
+    "python": "RUNTIME_CAPABLE",
+    "schemas": "CONTRACT_DATA",
+    "scripts": "CI_EXECUTABLE",
+    "tests": "TEST_EXECUTABLE"
+  },
+  "executable_extensions": [".py", ".mq5", ".mqh", ".ps1", ".sh", ".yaml", ".yml"]
+}
