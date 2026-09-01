@@ -11,5 +11,8 @@
     "scripts": "CI_EXECUTABLE",
     "tests": "TEST_EXECUTABLE"
   },
-  "executable_extensions": [".py", ".mq5", ".mqh", ".ps1", ".sh", ".yaml", ".yml"]
+  "executable_extensions": [
+    ".py", ".pyw", ".js", ".mjs", ".cjs", ".rb", ".pl", ".command",
+    ".zsh", ".bash", ".ipynb", ".mq5", ".mqh", ".ps1", ".sh", ".yaml", ".yml"
+  ]
 }

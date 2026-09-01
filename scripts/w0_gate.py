@@ -54,21 +54,15 @@ def code_files(surface_registry):
     for root_name in surface_registry["classified_roots"]:
         root = ROOT / root_name
         if root.exists():
-            yield from (p for p in root.rglob("*") if p.is_file())
+            yield from (
+                p for p in root.rglob("*")
+                if p.is_file() and "__pycache__" not in p.parts
+            )
 
 
 def scan_for_mutation_surface(surface_registry):
     hits = []
     for path in code_files(surface_registry):
-        if path.suffix.lower() not in {
-            ".py",
-            ".json",
-            ".yaml",
-            ".yml",
-            ".mq5",
-            ".mqh",
-        }:
-            continue
         text = path.read_text(encoding="utf-8", errors="replace")
         for name, pattern in MUTATION_PATTERNS.items():
             for match in pattern.finditer(text):
@@ -81,6 +75,30 @@ def scan_for_mutation_surface(surface_registry):
                     }
                 )
     return hits
+
+
+def suspect_runtime_files(surface_registry):
+    executable_extensions = set(surface_registry["executable_extensions"])
+    suspects = []
+    for root_name, classification in surface_registry["classified_roots"].items():
+        if classification != "RUNTIME_CAPABLE":
+            continue
+        root = ROOT / root_name
+        if not root.exists():
+            continue
+        for path in root.rglob("*"):
+            if not path.is_file() or "__pycache__" in path.parts:
+                continue
+            if path.name == ".gitkeep" and path.stat().st_size == 0:
+                continue
+            first_line = path.read_bytes()[:256].splitlines()[:1]
+            has_shebang = bool(first_line and first_line[0].startswith(b"#!"))
+            executable_bit = bool(path.stat().st_mode & 0o111)
+            known_extension = path.suffix.lower() in executable_extensions
+            if not known_extension or has_shebang or executable_bit:
+                if not known_extension:
+                    suspects.append(str(path.relative_to(ROOT)))
+    return sorted(set(suspects))
 
 
 def main():
@@ -98,6 +116,7 @@ def main():
         if cap.startswith("broker.") or cap.startswith("chart.object_")
     )
     mutation_hits = scan_for_mutation_surface(surface_registry)
+    suspect_runtime = suspect_runtime_files(surface_registry)
     executable_extensions = set(surface_registry["executable_extensions"])
     classified_roots = set(surface_registry["classified_roots"])
     unclassified_executables = sorted(
@@ -114,7 +133,7 @@ def main():
     )
     failures = bool(
         missing or forbidden or mutation_hits or present_excluded_inputs
-        or unclassified_executables
+        or unclassified_executables or suspect_runtime
     )
     evidence = {
         "project": "PTI.01",
@@ -131,6 +150,7 @@ def main():
         "forbidden_capabilities_in_allow_set": forbidden,
         "mutation_surface_hits": mutation_hits,
         "unclassified_executables": unclassified_executables,
+        "suspect_runtime_files": suspect_runtime,
         "present_excluded_inputs": present_excluded_inputs,
         "file_sha256": {
             name: digest(ROOT / name)

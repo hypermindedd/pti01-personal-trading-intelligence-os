@@ -30,6 +30,9 @@ class StaticGateEscapeTests(unittest.TestCase):
             )
             probes = {
                 "python/_probe.py": "mt5." + "order_send(request)",
+                "python/_probe.pyw": "mt5." + "order_send(request)",
+                "python/_probe.js": "mt5." + "order_send(request)",
+                "python/_probe": "#!/usr/bin/env python\nmt5." + "order_send(request)",
                 "scripts/_probe.py": "mt5." + "order_send(request)",
                 "tests/_probe.py": "mt5." + "order_send(request)",
                 "mql5/_probe.mq5": "Object" + "Create(0,x,OBJ_TREND,0,0,0);",
@@ -46,6 +49,51 @@ class StaticGateEscapeTests(unittest.TestCase):
         finally:
             for path in locals().get("paths", []):
                 path.unlink(missing_ok=True)
+            sys.path.remove(sys_path)
+
+    def test_unknown_extension_in_runtime_root_fails_closed(self):
+        sys_path = str(ROOT / "scripts")
+        import sys
+        sys.path.insert(0, sys_path)
+        path = ROOT / "python/_unknown.runtime"
+        try:
+            import w0_gate
+            registry = json.loads(
+                (ROOT / "config/source_surface_registry.v0.1.json").read_text()
+            )
+            path.write_text("safe-looking content", encoding="utf-8")
+            self.assertIn(
+                "python/_unknown.runtime",
+                w0_gate.suspect_runtime_files(registry),
+            )
+        finally:
+            path.unlink(missing_ok=True)
+            sys.path.remove(sys_path)
+
+    def test_only_empty_gitkeep_is_exempt(self):
+        sys_path = str(ROOT / "scripts")
+        import sys
+        sys.path.insert(0, sys_path)
+        path = ROOT / "python/_w_d/.gitkeep"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            import w0_gate
+            registry = json.loads(
+                (ROOT / "config/source_surface_registry.v0.1.json").read_text()
+            )
+            path.write_text("", encoding="utf-8")
+            self.assertNotIn(
+                "python/_w_d/.gitkeep",
+                w0_gate.suspect_runtime_files(registry),
+            )
+            path.write_text("#!/usr/bin/env python\n", encoding="utf-8")
+            self.assertIn(
+                "python/_w_d/.gitkeep",
+                w0_gate.suspect_runtime_files(registry),
+            )
+        finally:
+            path.unlink(missing_ok=True)
+            path.parent.rmdir()
             sys.path.remove(sys_path)
 
 
