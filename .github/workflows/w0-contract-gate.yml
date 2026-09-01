@@ -1,0 +1,24 @@
+name: W0 contract gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile contracts
+        run: python -m compileall -q python scripts
+      - name: Run unit tests
+        run: PYTHONPATH=python python -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Run W0 static gate
+        run: PYTHONPATH=python python scripts/w0_gate.py
